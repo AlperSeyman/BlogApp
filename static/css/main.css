@@ -1,0 +1,293 @@
+:root {
+  /* Fonts */
+  --font-heading: "Montserrat", system-ui, -apple-system, sans-serif;
+  --font-body: "Nunito", system-ui, -apple-system, sans-serif;
+
+  /* Modern Color Palette - Refined */
+  --color-primary: #527c9f;
+  --color-primary-hover: #40627e;
+  --color-accent: #38bdf8; /* New accent for subtle glows */
+
+  /* Light Mode vars */
+  --bg-body: #f3f4f6;       /* Slightly deeper grey for better contrast */
+  --bg-card: #ffffff;
+  --text-main: #1f2937;     /* Almost black, softer than #000 */
+  --text-muted: #6b7280;
+  --border-color: #e5e7eb;
+
+  /* Spacing & Radius - Making it rounder/friendlier */
+  --radius-md: 12px;
+  --radius-lg: 20px;        /* Larger curvature for modern feel */
+  --radius-pill: 50px;      /* For buttons */
+
+  /* Modern Shadows (Diffuse & Soft) */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-glow: 0 0 15px rgba(82, 124, 159, 0.3); /* Glow effect for primary items */
+
+  /* Navbar */
+  --nav-bg: rgba(82, 124, 159, 0.85); /* Semi-transparent for glass effect */
+  --nav-backdrop: blur(12px);         /* The blur amount */
+  --nav-text: rgba(255, 255, 255, 0.9);
+  --nav-text-hover: #ffffff;
+}
+
+/* =========================================
+   1. Base Styles & Typography
+   ========================================= */
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  line-height: 1.8; /* Relaxed reading */
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 800; /* Extra bold */
+  letter-spacing: -0.025em; /* Tight tracking is very modern */
+  color: var(--text-main);
+  margin-bottom: 1.25rem;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+}
+
+/* =========================================
+   2. Modern Glass Navigation
+   ========================================= */
+.site-header .navbar {
+  background-color: var(--nav-bg) !important;
+  backdrop-filter: var(--nav-backdrop); /* The Glass Effect */
+  -webkit-backdrop-filter: var(--nav-backdrop);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-md);
+  padding: 1rem 0; /* Taller navbar */
+  transition: all 0.3s ease;
+}
+
+.navbar-brand {
+  font-weight: 900;
+  font-size: 1.6rem;
+  letter-spacing: -1px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.site-header .nav-link {
+  color: var(--nav-text) !important;
+  font-weight: 600;
+  padding: 0.6rem 1.2rem !important;
+  border-radius: var(--radius-pill); /* Pill shaped links */
+  transition: all 0.2s ease;
+}
+
+.site-header .nav-link:hover,
+.site-header .nav-link.active {
+  color: var(--nav-text-hover) !important;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+/* =========================================
+   3. Cards & Content (Floating Paper Style)
+   ========================================= */
+main {
+  padding-top: 7rem;
+  padding-bottom: 5rem;
+}
+
+.content-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem; /* More breathing room */
+  margin-bottom: 2.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+}
+
+/* "Magnetic" Lift Effect */
+.content-section:hover {
+  transform: translateY(-6px) scale(1.005);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(82, 124, 159, 0.3); /* Subtle blue tint on hover border */
+}
+
+/* Sidebar Specifics */
+aside .content-section {
+  padding: 2rem;
+  border-radius: var(--radius-md);
+  position: sticky;
+  top: 6rem; /* Stays visible when scrolling */
+}
+
+aside h3 {
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+/* Sidebar Links */
+.list-group-item {
+  border: none;
+  padding: 0.85rem 0.5rem;
+  background: transparent;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-main);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.list-group-item:last-child {
+  border-bottom: none;
+}
+
+.list-group-item:hover {
+  background: transparent;
+  padding-left: 1rem; /* Deeper slide */
+  color: var(--color-primary);
+}
+
+/* Small indicator dot on hover */
+.list-group-item:hover::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--color-primary);
+}
+
+/* =========================================
+   4. Blog Posts & Articles
+   ========================================= */
+.article-title {
+  color: var(--text-main);
+  font-weight: 800;
+  font-size: 2rem; /* Bigger title */
+  line-height: 1.2;
+  margin-bottom: 0.75rem;
+  background: linear-gradient(to right, var(--text-main) 0%, var(--text-main) 100%);
+  background-size: 0% 2px;
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  transition: background-size 0.3s ease;
+}
+
+.article-title:hover {
+  color: var(--color-primary);
+}
+
+.article-metadata {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.article-metadata a {
+  color: var(--color-primary);
+  font-weight: 700;
+  background-color: rgba(82, 124, 159, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.article-content {
+  color: var(--text-main);
+  font-size: 1.15rem;
+  line-height: 1.8;
+  opacity: 0.9;
+}
+
+.article-img {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  margin-right: 20px;
+  object-fit: cover;
+  border: 4px solid var(--bg-card); /* Creates a "cutout" look */
+  box-shadow: var(--shadow-md);
+}
+
+/* =========================================
+   5. Dark Mode (Refined Slate)
+   ========================================= */
+[data-bs-theme="dark"] {
+  --bg-body: #0b1120;       /* Richer dark blue/black */
+  --bg-card: #1e293b;       /* Slate 800 */
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+  --nav-bg: rgba(15, 23, 42, 0.85); /* Dark glass */
+  --shadow-sm: none;
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 20px rgba(56, 189, 248, 0.2);
+}
+
+[data-bs-theme="dark"] .content-section {
+  border: 1px solid #334155;
+}
+
+[data-bs-theme="dark"] .article-metadata a {
+  background-color: rgba(56, 189, 248, 0.15); /* Brighter accent bg in dark mode */
+  color: #38bdf8;
+}
+
+[data-bs-theme="dark"] .list-group-item:hover {
+  color: #38bdf8;
+}
+
+[data-bs-theme="dark"] .list-group-item:hover::before {
+  color: #38bdf8;
+}
+
+/* =========================================
+   6. Modern Buttons (Pill Shape)
+   ========================================= */
+.btn {
+  border-radius: var(--radius-pill);
+  padding: 0.6rem 1.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  border: none;
+  box-shadow: var(--shadow-glow); /* Glowing shadow */
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px rgba(82, 124, 159, 0.4);
+}
+
+.btn-outline-light {
+  border-width: 2px;
+}
