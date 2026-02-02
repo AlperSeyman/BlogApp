@@ -1,37 +1,25 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
-posts: list[dict] = [
-    {
-        "id": 1,
-        "author": "Sally Rooney",
-        "title": "Normal People",
-        "content": "This book is wonderful and classic",
-        "data_poster": "2018",
-    },
-      {
-        "id": 2,
-        "author": "Jane Doe",
-        "title": "Python is Great for Web Development",
-        "content": "Python is a great language for web development, and FastAPI makes it even better",
-        "data_poster": "2025",
-    },
+posts = [
+    {"id": 1,"author":"Sally Rooney", "title": "Normal People", "content": "This book is wonderful", "date_posted": "2018"},
+    {"id": 2,"author":"Jone Doe","title": "Python is Great", "content": "FastAPI makes it even better", "date_posted": "2025"},
 ]
 
 @app.get("/")
-def home():
-    return {"message":"Hello World!"}
+def home(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="home_page.html",
+        context={"posts":posts, "title":"Home"},
+        )
 
 @app.get("/api/posts/")
 def get_all_authors():
     return posts
 
-@app.get("/api/posts/{post_id}")
-def get_author(post_id:int):
-
-    for post in posts:
-        if post["id"] == post_id:
-            return post
-
-    return {"Message":"Post not found"}
