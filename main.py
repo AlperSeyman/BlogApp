@@ -1,6 +1,9 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException, status
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -11,15 +14,72 @@ posts = [
     {"id": 2,"author":"Jone Doe","title": "Python is Great", "content": "FastAPI makes it even better", "date_posted": "2025"},
 ]
 
-@app.get("/")
+@app.get("/", include_in_schema=False, name="home")
+@app.get("/posts", include_in_schema=False, name="posts")
 def home(request: Request):
     return templates.TemplateResponse(
         request=request,
-        name="home_page.html",
+        name="home.html",
         context={"posts":posts, "title":"Home"},
         )
 
-@app.get("/api/posts/")
-def get_all_authors():
+@app.get("/posts/{post_id}", include_in_schema=False)
+def get_post(request: Request, post_id: int):
+
+    for post in posts:
+        if post.get("id") == post_id:
+            title = post["title"][:50]
+            return templates.TemplateResponse(
+                request=request,
+                name="post.html",
+                context={"post":post, "title":title}
+            )
+
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post Not Found")
+
+@app.get("/api/post")
+def get_Allpost():
     return posts
 
+@app.exception_handler(StarletteHTTPException)
+def general_http_exception_handler(request: Request, exception: StarletteHTTPException):
+
+    msg =  ( exception.detail if exception.detail else "An error occured. Please check your request and try again." ) # ternary operators
+    # if exception:
+    #     message = exception.detail
+    # else:
+    #     message = "An error occured. Please check your request and try again."
+
+    if request.url.path.startswith('/api'):
+        return JSONResponse(status_code=exception.status_code, content={'detail':msg})
+
+    return templates.TemplateResponse(
+        request=request,
+        name="error.html",
+        context={"status_code": exception.status_code, "title":exception.status_code, "message":msg},
+        status_code=exception.status_code,
+    )
+
+@app.exception_handler(RequestValidationError)
+def validation_exception_handler(request: Request, exception: RequestValidationError):
+
+    if request.url.path.startswith('/api'):
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            content={'detail': exception.errors()}
+        )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="error.html",
+        context={'status_code': status.HTTP_422_UNPROCESSABLE_CONTENT, 'title': status.HTTP_422_UNPROCESSABLE_CONTENT, "message":"Invalid request. Please check your input and try again."},
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT
+    )
+
+# @app.get("/api/posts/{post_id}")
+# def get_post(post_id: int):
+
+#     for post in posts:
+#         if post_id == post.get("id"): # post["id"]
+#             return post
+#     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found.")
