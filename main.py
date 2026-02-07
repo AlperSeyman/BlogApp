@@ -5,6 +5,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from schemas import PostCreate, PostRespone
+
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
@@ -37,9 +39,44 @@ def get_post(request: Request, post_id: int):
 
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post Not Found")
 
-@app.get("/api/post")
+@app.get("/api/post", response_model=list[PostRespone])
 def get_Allpost():
     return posts
+
+@app.get("/api/posts/{post_id}", response_model=PostRespone)
+def get_post(post_id: int):
+
+    for post in posts:
+        if post_id == post.get("id"): # post["id"]
+            return post
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found.")
+
+@app.post("/api/posts", response_model=PostRespone, status_code=status.HTTP_201_CREATED)
+def create_post(post: PostCreate):
+
+    new_id = max([post["id"] for post in posts]) + 1 if posts else 1
+
+    # current_id = 0
+    # if posts:
+    #     for post in posts:
+    #         if current_id < post["id"]:
+    #             current_id = post["id"]
+    #     new_id = current_id + 1
+    # else:
+    #     new_id = 1
+
+    new_post = {
+        "id": new_id,
+        "title":post.title,
+        "author": post.author,
+        "content": post.content,
+        "date_posted": "February 7, 2026"
+    }
+
+    posts.append(new_post)
+    return new_post
+
+
 
 @app.exception_handler(StarletteHTTPException)
 def general_http_exception_handler(request: Request, exception: StarletteHTTPException):
@@ -75,11 +112,3 @@ def validation_exception_handler(request: Request, exception: RequestValidationE
         context={'status_code': status.HTTP_422_UNPROCESSABLE_CONTENT, 'title': status.HTTP_422_UNPROCESSABLE_CONTENT, "message":"Invalid request. Please check your input and try again."},
         status_code=status.HTTP_422_UNPROCESSABLE_CONTENT
     )
-
-# @app.get("/api/posts/{post_id}")
-# def get_post(post_id: int):
-
-#     for post in posts:
-#         if post_id == post.get("id"): # post["id"]
-#             return post
-#     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found.")
