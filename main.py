@@ -77,7 +77,6 @@ def create_post(post: PostCreate):
     return new_post
 
 
-
 @app.exception_handler(StarletteHTTPException)
 def general_http_exception_handler(request: Request, exception: StarletteHTTPException):
 
