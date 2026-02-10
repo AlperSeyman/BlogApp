@@ -6,7 +6,7 @@ class UserBase(BaseModel):
     username: str = Field(min_length=1, max_length=50)
     email: EmailStr = Field(max_length=120)
 
-class UserCreat(UserBase):
+class UserCreate(UserBase):
     pass
 
 class UserResponse(UserBase):
