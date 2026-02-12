@@ -61,50 +61,65 @@ def get_post(request: Request, post_id: int, db:Annotated[Session, Depends(get_d
 
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post Not Found")
 
+@app.get("/users/{user_id}/posts", include_in_schema=False, name="user_posts")
+def get_user_posts(request: Request,user_id: int, db: Annotated[Session, Depends(get_db)]):
+
+    result = db.execute(select(models.User).where(models.User.id == user_id))
+    user = result.scalars().first()
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    result = db.execute(select(models.Post).where(models.Post.user_id == user_id))
+    posts = result.scalars().all()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="user_posts.html",
+        context={"posts": posts, "user": user, "title":f"{user.username}' Posts"},
+    )
+
+
 #############################################################################################
 
 # API PROCESS
 
+# get all posts
 @app.get("/api/post", response_model=list[PostRespone])
-def get_Allpost():
+def get_Allpost_api(db: Annotated[Session, Depends(get_db)]):
+
+    posts = db.execute(select(models.Post)).scalars().all()
     return posts
 
+# get specific post
 @app.get("/api/posts/{post_id}", response_model=PostRespone)
-def get_post(post_id: int):
+def get_post_api(post_id: int, db: Annotated[Session, Depends(get_db)]):
 
-    for post in posts:
-        if post_id == post.get("id"): # post["id"]
-            return post
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found.")
+    result = db.execute(select(models.Post).where(models.Post.id == post_id))
+    post = result.scalars().first()
+    if post:
+        return post
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
 
+# create a post
 @app.post("/api/posts", response_model=PostRespone, status_code=status.HTTP_201_CREATED)
-def create_post(post: PostCreate):
+def create_post_api(post: PostCreate, db: Annotated[Session, Depends(get_db)]):
 
-    new_id = max([post["id"] for post in posts]) + 1 if posts else 1
+    result = db.execute(select(models.User).where(models.User.id == post.user_id))
+    user = result.scalars().first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-    # current_id = 0
-    # if posts:
-    #     for post in posts:
-    #         if current_id < post["id"]:
-    #             current_id = post["id"]
-    #     new_id = current_id + 1
-    # else:
-    #     new_id = 1
+    new_post = models.Post(title=post.title, content=post.content, user_id=post.user_id)
+    db.add(new_post)
+    db.commit()
+    db.refresh(new_post)
 
-    new_post = {
-        "id": new_id,
-        "title":post.title,
-        "author": post.author,
-        "content": post.content,
-        "date_posted": "February 7, 2026"
-    }
-
-    posts.append(new_post)
     return new_post
 
 # get all users
 @app.get("/api/users", response_model=list[UserResponse])
-def get_all_users(db: Annotated[Session, Depends(get_db)]):
+def get_all_users_api(db: Annotated[Session, Depends(get_db)]):
 
     users = db.execute(select(models.User)).scalars().all()
 
@@ -125,7 +140,7 @@ def get_user_by_id(user_id: int, db: Annotated[Session, Depends(get_db)]):
 
 # get specific user's posts
 @app.get("/api/users/{user_id}/posts", response_model=list[PostRespone])
-def get_user_posts(user_id: int, db:Annotated[Session, Depends(get_db)]):
+def get_user_posts_api(user_id: int, db: Annotated[Session, Depends(get_db)]):
 
     result = db.execute(select(models.User).where(models.User.id == user_id))
     user = result.scalars().first()
@@ -139,7 +154,7 @@ def get_user_posts(user_id: int, db:Annotated[Session, Depends(get_db)]):
 
 # create a user
 @app.post("/api/user", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-def create_user(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
+def create_user_api(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
 
     result = db.execute(
         select(models.User).where(models.User.username == user.username)
