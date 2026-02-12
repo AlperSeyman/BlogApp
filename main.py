@@ -130,7 +130,7 @@ def get_all_users_api(db: Annotated[Session, Depends(get_db)]):
 def get_user_by_id(user_id: int, db: Annotated[Session, Depends(get_db)]):
 
     result = db.execute(
-        select(models.User).where(models.User.id == user_id)
+        select(models.User).where(models.User.id == user_id),
     )
     user = result.scalars().first()
     if  user:
