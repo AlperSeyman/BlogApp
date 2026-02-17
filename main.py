@@ -126,6 +126,25 @@ def updateFull_post_api(post_id: int, post_data: PostCreate, db: Annotated[Sessi
 
     return post
 
+# update a post (patch)
+@app.patch("/api/posts/{post_id}", response_model=PostResponse)
+def updatePartial_post_api(post_id: int, post_data: PostUpdate, db: Annotated[Session, Depends(get_db)]):
+
+    result = db.execute(select(models.Post).where(models.Post.id == post_id))
+    post = result.scalars().first()
+
+    if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+
+    update_post_dict = post_data.model_dump(exclude_unset=True)
+
+    for field, value in update_post_dict.items():
+        setattr(post, field, value)
+
+    db.commit()
+    db.refresh(post)
+
+    return post
 
 # create a post
 @app.post("/api/posts", response_model=PostResponse, status_code=status.HTTP_201_CREATED)
