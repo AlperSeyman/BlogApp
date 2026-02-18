@@ -171,7 +171,7 @@ def create_post_api(post: PostCreate, db: Annotated[Session, Depends(get_db)]):
 
 # delete a post
 @app.delete("/api/posts/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_post_item(post_id: int, db: Annotated[Session, Depends(get_db)]):
+def delete_post_api(post_id: int, db: Annotated[Session, Depends(get_db)]):
 
     result = db.execute(select(models.Post).where(models.Post.id == post_id))
     post = result.scalars().first()
@@ -195,7 +195,7 @@ def get_all_users_api(db: Annotated[Session, Depends(get_db)]):
 
 # get specific user
 @app.get("/api/users/{user_id}", response_model=UserResponse)
-def get_user_by_id(user_id: int, db: Annotated[Session, Depends(get_db)]):
+def get_user_by_id_api(user_id: int, db: Annotated[Session, Depends(get_db)]):
 
     result = db.execute(
         select(models.User).where(models.User.id == user_id),
@@ -279,7 +279,20 @@ def create_user_api(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
 
     return new_user
 
+# delete user
+@app.delete("/api/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user_api(user_id: int, db: Annotated[Session, Depends(get_db)]):
 
+    result = db.execute(select(models.User).where(models.User.id == user_id))
+    user = result.scalars().first()
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail="User not found.")
+
+    db.delete(user)
+    db.commit
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @app.exception_handler(StarletteHTTPException)
 def general_http_exception_handler(request: Request, exception: StarletteHTTPException):
