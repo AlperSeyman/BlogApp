@@ -9,6 +9,18 @@
         {% else %}
             <title>FastAPI Blog</title>
         {% endif %}
+        <meta name="description" content="FastAPI Tutorial">
+        <meta name="author" content="Corey Schafer">
+        <!-- Open Graph Tags: The title of the page for social media sharing. It can match the title tag or be more descriptive. -->
+        <meta property="og:title" content="FastAPI Blog">
+        <!-- Open Graph Tags: Typically set to "website" for static sites or "article" for content-heavy pages. -->
+        <meta property="og:type" content="website">
+        <!-- Open Graph Tags: The URL of the page, used to ensure link previews resolve to the correct page. -->
+        <meta property="og:url" content="">
+        <!-- Open Graph Tags: URL of an image that represents the page. Useful for link previews. -->
+        <meta property="og:image" content="">
+        <!-- Open Graph Tags: Provides an alternative text for the image to improve accessibility. -->
+        <meta property="og:image:alt" content="">
         <!-- Preconnect for Google Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,7 +35,7 @@
         <!-- Stylesheet -->
         <link rel="stylesheet"
               type="text/css"
-              href="{{ url_for('static', path='css/main.css') }}">
+              href="{{ url_for("static", path='css/main.css') }}">
         <!-- Set a theme color that matches your website's primary color -->
         <meta name="theme-color" content="#527c9f">
         <!-- Favicon for all browsers -->
@@ -49,7 +61,7 @@
             <nav class="navbar navbar-expand-md bg-steel fixed-top"
                  data-bs-theme="dark">
                 <div class="container">
-                    <a class="navbar-brand me-4" href="{{ url_for('home') }}">FastAPI Blog</a>
+                    <a class="navbar-brand me-4" href="{{ url_for("home") }}">FastAPI Blog</a>
                     <button class="navbar-toggler"
                             type="button"
                             data-bs-toggle="collapse"
@@ -63,7 +75,7 @@
                         <div class="navbar-nav me-auto">
                             <a class="nav-link active"
                                aria-current="page"
-                               href="{{ url_for('home') }}">Home</a>
+                               href="{{ url_for("home") }}">Home</a>
                         </div>
                         <!-- Navbar Right Side -->
                         <div class="navbar-nav">
@@ -73,17 +85,16 @@
                                         type="button"
                                         data-bs-toggle="modal"
                                         data-bs-target="#createPostModal">New Post</button>
-                                <span id="usernameDisplay" class="navbar-text me-md-2"></span>
-                                <button class="btn btn-outline-light mb-2 mb-md-0 me-md-3"
-                                        type="button"
-                                        id="logoutBtn">Logout</button>
+                                <a class="btn btn-light mb-2 mb-md-0 me-md-3"
+                                   href="{{ url_for("account_page") }}"
+                                   id="accountBtn">Account</a>
                             </div>
                             <!-- Shown when logged out -->
                             <div id="loggedOutNav">
                                 <a class="btn btn-outline-light mb-2 mb-md-0 me-md-2"
-                                   href="{{ url_for('login_page') }}">Login</a>
+                                   href="{{ url_for("login_page") }}">Login</a>
                                 <a class="btn btn-light mb-2 mb-md-0 me-md-3"
-                                   href="{{ url_for('register_page') }}">Register</a>
+                                   href="{{ url_for("register_page") }}">Register</a>
                             </div>
                             <div class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle"
@@ -134,7 +145,7 @@
         <footer class="mt-auto py-3 bg-body-tertiary border-top">
             <div class="container text-center">
                 <p class="text-body-secondary mb-0">
-                    © <span id="year"></span> A.S
+                    © <span id="year"></span> Corey Schafer
                 </p>
             </div>
         </footer>
@@ -254,31 +265,28 @@
         </script>
         <!-- Auth State Management -->
         <script type="module">
-        import { getCurrentUser, logout } from '/static/js/auth.js';
+            import { getCurrentUser } from '/static/js/auth.js';
 
-        // Update navbar based on auth state
-        async function updateAuthUI() {
-            const user = await getCurrentUser();
-            const loggedInNav = document.getElementById('loggedInNav');
-            const loggedOutNav = document.getElementById('loggedOutNav');
+            async function updateAuthUI() {
+                const user = await getCurrentUser();
+                const loggedInNav = document.getElementById('loggedInNav');
+                const loggedOutNav = document.getElementById('loggedOutNav');
+                const accountBtn = document.getElementById('accountBtn');
 
-            if (user) {
-            loggedInNav.classList.remove('d-none');
-            loggedInNav.classList.add('d-flex');
-            loggedOutNav.classList.add('d-none');
-            document.getElementById('usernameDisplay').textContent = user.email;
-            } else {
-            loggedInNav.classList.add('d-none');
-            loggedInNav.classList.remove('d-flex');
-            loggedOutNav.classList.remove('d-none');
+                if (user) {
+                    loggedInNav.classList.remove('d-none');
+                    loggedInNav.classList.add('d-flex');
+                    loggedOutNav.classList.add('d-none');
+                    accountBtn.textContent = user.username;
+                } else {
+                    loggedInNav.classList.add('d-none');
+                    loggedInNav.classList.remove('d-flex');
+                    loggedOutNav.classList.remove('d-none');
+                    accountBtn.textContent = 'Account';
+                }
             }
-        }
 
-        // Logout handler
-        document.getElementById('logoutBtn').addEventListener('click', logout);
-
-        // Update UI on page load
-        updateAuthUI();
+            updateAuthUI();
         </script>
         <!-- Create Post Form Handler -->
         <script type="module">
@@ -287,6 +295,7 @@
             hideModal,
             showModal,
             } from "/static/js/utils.js";
+            import { getToken } from '/static/js/auth.js';
 
             const createForm = document.getElementById("createPostForm");
 
@@ -294,12 +303,17 @@
             // Stop default form submission - we'll handle it with JavaScript
             event.preventDefault();
 
+            const token = getToken();
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
             // Gather form values into a plain object {title: "...", content: "..."}
             const formData = new FormData(createForm);
             const postData = Object.fromEntries(formData.entries());
 
-            // TEMPORARY - hardcoded until authorization (Tutorial 11)
-            postData.user_id = 1;
+
 
             try {
                 // POST to our API as JSON
@@ -307,9 +321,15 @@
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify(postData),
                 });
+
+                if (response.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
 
                 if (response.ok) {
                 const data = await response.json();
