@@ -34,7 +34,7 @@ async def get_post_api(post_id: int, db: Annotated[AsyncSession, Depends(get_db)
 
 # update a post (put)
 @router.put("/{post_id}", response_model=PostResponse)
-async def updateFull_post_api(post_id: int, current_user: CurrentUser, post_data: PostCreate, db: Annotated[AsyncSession, Depends(get_db)]):
+async def updateFull_post_api(post_id: int, current_user: CurrentUser, post_data: PostUpdate, db: Annotated[AsyncSession, Depends(get_db)]):
 
     result = await db.execute(select(models.Post).options(selectinload(models.Post.author)).where(models.Post.id == post_id))
     post = result.scalars().first()
