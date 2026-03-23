@@ -55,3 +55,13 @@ class PostResponse(PostBase):
     user_id: int
     date_posted: datetime
     author: UserPublic
+
+
+class PaginatedPostResponse(BaseModel):
+    post: list[PostResponse]
+    total: int
+    skip: int
+    limit: int
+    has_more: bool
+
+    # skip = where to start, limit = how many to take. Together they let users browse large datasets in small, safe chunks
