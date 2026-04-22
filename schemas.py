@@ -58,10 +58,24 @@ class PostResponse(PostBase):
 
 
 class PaginatedPostResponse(BaseModel):
-    post: list[PostResponse]
+    posts: list[PostResponse]
     total: int
     skip: int
     limit: int
     has_more: bool
 
     # skip = where to start, limit = how many to take. Together they let users browse large datasets in small, safe chunks
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr = Field(max_length=120)
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str = Field(min_length=8)
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str = Field(min_length=8)

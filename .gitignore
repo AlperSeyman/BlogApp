@@ -212,3 +212,5 @@ workplace.py
 blog.db
 
 .vscode
+
+populated_db.py
